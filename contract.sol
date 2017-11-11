@@ -2,7 +2,7 @@ pragma solidity ^0.4.16;
 
 interface tokenRecipient { function receiveApproval(address _from, uint256 _value, address _token, bytes _extraData) public; }
 
-contract TokenERC20 {
+contract ShareCoin {
     // Public variables of the token
     string public name;
     string public symbol;
@@ -11,9 +11,10 @@ contract TokenERC20 {
     uint256 public totalSupply;
 
     // This creates an array with all balances
-    mapping (address => uint256) public balanceOf;
+    mapping (address => uint256) public shareBalance;
+    mapping (address => uint256) public etherBalance;
     mapping (address => mapping (address => uint256)) public allowance;
-
+    
     // This generates a public event on the blockchain that will notify clients
     event Transfer(address indexed from, address indexed to, uint256 value);
 
@@ -28,14 +29,40 @@ contract TokenERC20 {
     function TokenERC20(
         uint256 initialSupply,
         string tokenName,
-        string tokenSymbol
+        string tokenSymbol,
+	uint256 amountOfCoins,
     ) public {
-        totalSupply = initialSupply * 10 ** uint256(decimals);  // Update total supply with the decimal amount
-        balanceOf[msg.sender] = totalSupply;                // Give the creator all initial tokens
         name = tokenName;                                   // Set the name for display purposes
         symbol = tokenSymbol;                               // Set the symbol for display purposes
+	amountOfCoins = 0;	
+	
     }
 
+    address[] shareAddresses; 
+
+    function buyIn() public { //figure out how to show the amount of coin that is send along with the contract
+	uint ether = msg.value;	
+        amountOfCoins += coins; 
+	addToBalance(coins);
+
+    }
+		
+    function addToBalance(int256 amount) private {
+        shareBalance[message.sender] += coin;
+	
+    }
+
+    function distribute(int256 amount) private {
+	uint balance;
+	
+	for(uint i = 0; i < shareBalance.shareAddresses; i++) {
+	   address a = shareAddresses[i];
+	   uint shareCoins = shareBalance[a];  
+	    
+        }
+
+    }
+ 
     /**
      * Internal transfer, only can be called by this contract
      */
@@ -43,18 +70,18 @@ contract TokenERC20 {
         // Prevent transfer to 0x0 address. Use burn() instead
         require(_to != 0x0);
         // Check if the sender has enough
-        require(balanceOf[_from] >= _value);
+        require(shareBalance[_from] >= _value);
         // Check for overflows
-        require(balanceOf[_to] + _value > balanceOf[_to]);
+        require(shareBalance[_to] + _value > shareBalance[_to]);
         // Save this for an assertion in the future
-        uint previousBalances = balanceOf[_from] + balanceOf[_to];
+        uint previousBalances = shareBalance[_from] + shareBalance[_to];
         // Subtract from the sender
-        balanceOf[_from] -= _value;
+        shareBalance[_from] -= _value;
         // Add the same to the recipient
-        balanceOf[_to] += _value;
+        shareBalance[_to] += _value;
         Transfer(_from, _to, _value);
         // Asserts are used to use static analysis to find bugs in your code. They should never fail
-        assert(balanceOf[_from] + balanceOf[_to] == previousBalances);
+        assert(shareBalance[_from] + shareBalance[_to] == previousBalances);
     }
 
     /**
@@ -126,8 +153,8 @@ contract TokenERC20 {
      * @param _value the amount of money to burn
      */
     function burn(uint256 _value) public returns (bool success) {
-        require(balanceOf[msg.sender] >= _value);   // Check if the sender has enough
-        balanceOf[msg.sender] -= _value;            // Subtract from the sender
+        require(shareBalance[msg.sender] >= _value);   // Check if the sender has enough
+        shareBalance[msg.sender] -= _value;            // Subtract from the sender
         totalSupply -= _value;                      // Updates totalSupply
         Burn(msg.sender, _value);
         return true;
@@ -142,9 +169,9 @@ contract TokenERC20 {
      * @param _value the amount of money to burn
      */
     function burnFrom(address _from, uint256 _value) public returns (bool success) {
-        require(balanceOf[_from] >= _value);                // Check if the targeted balance is enough
+        require(shareBalance[_from] >= _value);                // Check if the targeted balance is enough
         require(_value <= allowance[_from][msg.sender]);    // Check allowance
-        balanceOf[_from] -= _value;                         // Subtract from the targeted balance
+        shareBalance[_from] -= _value;                         // Subtract from the targeted balance
         allowance[_from][msg.sender] -= _value;             // Subtract from the sender's allowance
         totalSupply -= _value;                              // Update totalSupply
         Burn(_from, _value);
