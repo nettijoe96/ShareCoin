@@ -20,6 +20,9 @@ contract ShareCoin {
 
     // This notifies clients about the amount burnt
     event Burn(address indexed from, uint256 value);
+    
+    //creates a send event
+    event FundTransfer(address shareholder, uint amount);
 
     /**
      * Constrctor function
@@ -39,20 +42,6 @@ contract ShareCoin {
     }
 
     address[] shareAddresses; 
-
-    /**
-     * Fallback function
-     *
-     * The function without name is the default function that is called whenever anyone sends funds to a contract
-     */
-    function () payable {
-        require(!crowdsaleClosed);
-        uint amount = msg.value;
-        balanceOf[msg.sender] += amount;
-        amountRaised += amount;
-        tokenReward.transfer(msg.sender, amount / price);
-        FundTransfer(msg.sender, amount, true);
-    }
 
     function buyIn() public { //figure out how to show the amount of coin that is send along with the contract
 	uint ether = msg.value;	
@@ -85,7 +74,7 @@ contract ShareCoin {
 	    etherBalance[msg.sender] -= amount;
 	    //send ether here
   	    address.send(amount);
-	    FundTransfer(address, amount, false);	
+	    FundTransfer(a, amount);	
 	    return true;
 	}
 	return false;
