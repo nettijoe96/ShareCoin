@@ -32,7 +32,6 @@ contract ShareCoin {
      * Initializes contract with initial supply tokens to the creator of the contract
      */
     function TokenERC20(
-        uint256 initialSupply,
         string tokenName,
         string tokenSymbol
     ) public {
@@ -42,7 +41,7 @@ contract ShareCoin {
         remainderEth = 0;
     }
 
-    function buyIn() public { //figure out how to show the amount of coin that is send along with the contract
+    function buyIn() public payable { //figure out how to show the amount of coin that is send along with the contract
 	    uint ethr = msg.value;
         totalShares += ethr;
 	    addToBalance(ethr);
@@ -75,7 +74,7 @@ contract ShareCoin {
     	if(amount <= etherBalance[msg.sender]) {
     	    etherBalance[msg.sender] -= amount;
     	    //send ether here
-      	    msg.sender.send(amount);
+      	    msg.sender.transfer(amount);
     	    FundTransfer(a, amount);	
     	    return true;
     	}
