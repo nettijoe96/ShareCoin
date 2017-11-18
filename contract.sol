@@ -9,6 +9,9 @@ contract ShareCoin {
     uint8 public decimals = 18;
     // 18 decimals is the strongly suggested default, avoid changing it
     uint256 public totalSupply;
+    uint amountOfCoins;	
+    uint remainderEth;
+    address[] shareAddresses; 
 
     // This creates an array with all balances
     mapping (address => uint256) public shareBalance;
@@ -32,54 +35,53 @@ contract ShareCoin {
     function TokenERC20(
         uint256 initialSupply,
         string tokenName,
-        string tokenSymbol,
-	uint256 amountOfCoins,
+        string tokenSymbol
     ) public {
         name = tokenName;                                   // Set the name for display purposes
-        symbol = tokenSymbol;                               // Set the symbol for display purposes
-	amountOfCoins = 0;	
-	
+        symbol = tokenSymbol;   // Set the symbol for display purposes
+        totalSupply = 0;
+        amountOfCoins = 0;
+        remainderEth = 0;
     }
-
-    address[] shareAddresses; 
 
     function buyIn() public { //figure out how to show the amount of coin that is send along with the contract
-	uint ether = msg.value;	
-        amountOfCoins += coins; 
-	addToBalance(coins);
-        distribute(coins); 
+	    uint ethr = msg.value;
+        amountOfCoins += ethr;
+	    addToBalance(ethr);
+        distribute(ethr);
+        totalSupply += ethr;
     }
 		
-    function addToBalance(int256 amount) private {
-        shareBalance[message.sender] += coin;
+    function addToBalance(uint amount) private {
+        shareBalance[msg.sender] += amount;
 	
     }
 
-    function distribute(int256 amount) private {
-	uint balance;
-	
-	for(uint i = 0; i < shareBalance.shareAddresses; i++) {
-	   address a = shareAddresses[i];
-	   uint shareCoins = shareBalance[a];  
-	   //add coins to ether balance
-	   etherBalance[a] += shareCoins;
-	     
+    function distribute(uint amount) private {
+        uint shareEthValue = amount / totalShares;
+        for(uint i = 0; i < shareAddresses.length; i++) {
+           address a = shareAddresses[i];
+           uint shareCoins = shareBalance[a];  
+           
+           //add coins to ether balance
+           etherBalance[a] += shareCoins;
+           
         }
 
     }
 
-    function withdrawl(int256 amount, address a) public returns (bool success) {
-	//sending ether out of the contract
-	if(amount <= etherBalance[msg.sender]) {
-	    etherBalance[msg.sender] -= amount;
-	    //send ether here
-  	    address.send(amount);
-	    FundTransfer(a, amount);	
-	    return true;
-	}
-	return false;
-	
-    }
+    function withdrawl(uint256 amount, address a) public returns (bool success) {
+    	//sending ether out of the contract
+    	if(amount <= etherBalance[msg.sender]) {
+    	    etherBalance[msg.sender] -= amount;
+    	    //send ether here
+      	    msg.sender.send(amount);
+    	    FundTransfer(a, amount);	
+    	    return true;
+    	}
+    	return false;
+    	
+        }
  
     /**
      * Internal transfer, only can be called by this contract
@@ -196,5 +198,3 @@ contract ShareCoin {
         return true;
     }
 }
-
-
