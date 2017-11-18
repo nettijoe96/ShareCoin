@@ -40,6 +40,20 @@ contract ShareCoin {
 
     address[] shareAddresses; 
 
+    /**
+     * Fallback function
+     *
+     * The function without name is the default function that is called whenever anyone sends funds to a contract
+     */
+    function () payable {
+        require(!crowdsaleClosed);
+        uint amount = msg.value;
+        balanceOf[msg.sender] += amount;
+        amountRaised += amount;
+        tokenReward.transfer(msg.sender, amount / price);
+        FundTransfer(msg.sender, amount, true);
+    }
+
     function buyIn() public { //figure out how to show the amount of coin that is send along with the contract
 	uint ether = msg.value;	
         amountOfCoins += coins; 
@@ -65,12 +79,16 @@ contract ShareCoin {
 
     }
 
-    function withdrawl(int256 amount, address a) public {
+    function withdrawl(int256 amount, address a) public returns (bool success) {
 	//sending ether out of the contract
 	if(amount <= etherBalance[msg.sender]) {
 	    etherBalance[msg.sender] -= amount;
 	    //send ether here
+  	    address.send(amount);
+	    FundTransfer(address, amount, false);	
+	    return true;
 	}
+	return false;
 	
     }
  
