@@ -44,7 +44,7 @@ contract ShareCoin {
 	uint ether = msg.value;	
         amountOfCoins += coins; 
 	addToBalance(coins);
-
+        distribute(coins); 
     }
 		
     function addToBalance(int256 amount) private {
@@ -58,9 +58,20 @@ contract ShareCoin {
 	for(uint i = 0; i < shareBalance.shareAddresses; i++) {
 	   address a = shareAddresses[i];
 	   uint shareCoins = shareBalance[a];  
-	    
+	   //add coins to ether balance
+	   etherBalance[a] += shareCoins;
+	     
         }
 
+    }
+
+    function withdrawl(int256 amount, address a) public {
+	//sending ether out of the contract
+	if(amount <= etherBalance[msg.sender]) {
+	    etherBalance[msg.sender] -= amount;
+	    //send ether here
+	}
+	
     }
  
     /**
