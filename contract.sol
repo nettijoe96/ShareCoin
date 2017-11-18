@@ -8,8 +8,7 @@ contract ShareCoin {
     string public symbol;
     uint8 public decimals = 18;
     // 18 decimals is the strongly suggested default, avoid changing it
-    uint256 public totalSupply;
-    uint amountOfCoins;	
+    uint256 public totalShares;
     uint remainderEth;
     address[] shareAddresses; 
 
@@ -39,17 +38,16 @@ contract ShareCoin {
     ) public {
         name = tokenName;                                   // Set the name for display purposes
         symbol = tokenSymbol;   // Set the symbol for display purposes
-        totalSupply = 0;
-        amountOfCoins = 0;
+        totalShares = 0;
         remainderEth = 0;
     }
 
     function buyIn() public { //figure out how to show the amount of coin that is send along with the contract
 	    uint ethr = msg.value;
-        amountOfCoins += ethr;
+        totalShares += ethr;
 	    addToBalance(ethr);
         distribute(ethr);
-        totalSupply += ethr;
+        totalShares += ethr;
     }
 		
     function addToBalance(uint amount) private {
@@ -58,13 +56,15 @@ contract ShareCoin {
     }
 
     function distribute(uint amount) private {
-        uint shareEthValue = amount / totalShares;
+        uint totalAmount = remainderEth + amount;
+        uint shareEthValue = totalAmount / totalShares;
+        remainderEth = amount % totalShares;
         for(uint i = 0; i < shareAddresses.length; i++) {
            address a = shareAddresses[i];
            uint shareCoins = shareBalance[a];  
-           
+           uint payout = shareCoins * shareEthValue;
            //add coins to ether balance
-           etherBalance[a] += shareCoins;
+           etherBalance[a] += payout;
            
         }
 
@@ -81,7 +81,7 @@ contract ShareCoin {
     	}
     	return false;
     	
-        }
+    }
  
     /**
      * Internal transfer, only can be called by this contract
@@ -175,7 +175,7 @@ contract ShareCoin {
     function burn(uint256 _value) public returns (bool success) {
         require(shareBalance[msg.sender] >= _value);   // Check if the sender has enough
         shareBalance[msg.sender] -= _value;            // Subtract from the sender
-        totalSupply -= _value;                      // Updates totalSupply
+        totalShares -= _value;                      // Updates totalSupply
         Burn(msg.sender, _value);
         return true;
     }
@@ -193,7 +193,7 @@ contract ShareCoin {
         require(_value <= allowance[_from][msg.sender]);    // Check allowance
         shareBalance[_from] -= _value;                         // Subtract from the targeted balance
         allowance[_from][msg.sender] -= _value;             // Subtract from the sender's allowance
-        totalSupply -= _value;                              // Update totalSupply
+        totalShares -= _value;                              // Update totalSupply
         Burn(_from, _value);
         return true;
     }
